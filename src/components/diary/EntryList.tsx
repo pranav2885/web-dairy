@@ -42,7 +42,7 @@ export function EntryList({ onSelectEntry, onNewEntry }: EntryListProps) {
         <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
           <span className="text-3xl">📔</span>
         </div>
-        <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
+        <h2 className="text-xl font-semibold text-foreground mb-2">
           Your diary awaits
         </h2>
         <p className="text-muted-foreground mb-6 max-w-sm">
@@ -59,7 +59,7 @@ export function EntryList({ onSelectEntry, onNewEntry }: EntryListProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-serif text-lg font-semibold text-foreground">
+        <h2 className="text-lg font-semibold text-foreground">
           Your Entries
         </h2>
         <Button onClick={onNewEntry} size="sm" className="gap-1.5">

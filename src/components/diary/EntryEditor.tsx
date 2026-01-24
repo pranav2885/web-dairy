@@ -174,7 +174,7 @@ export function EntryEditor({ entry, onSave, onBack }: EntryEditorProps) {
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="Entry title..."
-              className="font-serif text-2xl border-0 border-b rounded-none px-0 focus-visible:ring-0 bg-transparent"
+              className="text-2xl font-semibold border-0 border-b rounded-none px-0 focus-visible:ring-0 bg-transparent"
             />
           </div>
 

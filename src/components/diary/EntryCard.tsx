@@ -29,7 +29,7 @@ export function EntryCard({ entry, onClick, className }: EntryCardProps) {
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className="font-serif text-lg font-semibold text-card-foreground truncate">
+            <h3 className="text-lg font-semibold text-card-foreground truncate">
               {title}
             </h3>
             <p className="text-sm text-muted-foreground">

@@ -4,12 +4,12 @@ import { getUserPref, setUserPref } from '@/lib/db';
 type Theme = 'light' | 'dark' | 'system';
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>('system');
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setThemeState] = useState<Theme>('dark');
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
     // Load saved theme
-    getUserPref<Theme>('theme', 'system').then(savedTheme => {
+    getUserPref<Theme>('theme', 'dark').then(savedTheme => {
       setThemeState(savedTheme);
     });
   }, []);

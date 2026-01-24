@@ -1,5 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,166 +9,157 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Warm cream backgrounds */
-    --background: 40 33% 96%;
-    --foreground: 25 30% 15%;
+    /* Pure monochrome light theme */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 10%;
 
-    /* Soft paper-like cards */
-    --card: 45 40% 98%;
-    --card-foreground: 25 30% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
 
-    --popover: 40 35% 95%;
-    --popover-foreground: 25 30% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
 
-    /* Muted terracotta primary */
-    --primary: 15 45% 45%;
-    --primary-foreground: 45 40% 98%;
+    /* Elegant gray primary */
+    --primary: 0 0% 20%;
+    --primary-foreground: 0 0% 98%;
 
-    /* Warm brown secondary */
-    --secondary: 30 25% 88%;
-    --secondary-foreground: 25 30% 25%;
+    /* Subtle gray secondary */
+    --secondary: 0 0% 92%;
+    --secondary-foreground: 0 0% 20%;
 
     /* Soft muted tones */
-    --muted: 35 20% 90%;
-    --muted-foreground: 25 15% 45%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
 
-    /* Gentle accent */
-    --accent: 35 35% 92%;
-    --accent-foreground: 25 30% 25%;
+    --accent: 0 0% 95%;
+    --accent-foreground: 0 0% 15%;
 
-    /* Warm destructive */
     --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Soft warm borders */
-    --border: 35 20% 85%;
-    --input: 35 25% 88%;
-    --ring: 15 45% 45%;
+    /* Refined borders */
+    --border: 0 0% 90%;
+    --input: 0 0% 92%;
+    --ring: 0 0% 20%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 40 30% 97%;
-    --sidebar-foreground: 25 30% 15%;
-    --sidebar-primary: 15 45% 45%;
-    --sidebar-primary-foreground: 45 40% 98%;
-    --sidebar-accent: 35 35% 92%;
-    --sidebar-accent-foreground: 25 30% 25%;
-    --sidebar-border: 35 20% 85%;
-    --sidebar-ring: 15 45% 45%;
+    --sidebar-background: 0 0% 97%;
+    --sidebar-foreground: 0 0% 10%;
+    --sidebar-primary: 0 0% 20%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent-foreground: 0 0% 15%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 0 0% 20%;
 
-    /* Mood chart colors - warm spectrum */
-    --chart-1: 45 70% 60%;
-    --chart-2: 30 60% 55%;
-    --chart-3: 15 50% 50%;
-    --chart-4: 0 45% 55%;
-    --chart-5: 350 40% 50%;
+    /* Monochrome chart colors */
+    --chart-1: 0 0% 30%;
+    --chart-2: 0 0% 40%;
+    --chart-3: 0 0% 50%;
+    --chart-4: 0 0% 60%;
+    --chart-5: 0 0% 70%;
 
-    --sidebar: 40 30% 97%;
+    --sidebar: 0 0% 97%;
 
-    --font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
-    --font-serif: 'Crimson Pro', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
-    --font-mono: 'SF Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    --font-serif: 'Poppins', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+    --font-mono: 'Poppins', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
-    /* Soft, cozy shadows */
-    --shadow-2xs: 0 1px 2px 0px hsl(25 30% 20% / 0.03);
-    --shadow-xs: 0 1px 3px 0px hsl(25 30% 20% / 0.04);
-    --shadow-sm: 0 2px 4px 0px hsl(25 30% 20% / 0.06), 0 1px 2px -1px hsl(25 30% 20% / 0.04);
-    --shadow: 0 4px 6px -1px hsl(25 30% 20% / 0.08), 0 2px 4px -2px hsl(25 30% 20% / 0.05);
-    --shadow-md: 0 6px 10px -2px hsl(25 30% 20% / 0.1), 0 3px 5px -3px hsl(25 30% 20% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(25 30% 20% / 0.12), 0 4px 6px -4px hsl(25 30% 20% / 0.08);
-    --shadow-xl: 0 20px 25px -5px hsl(25 30% 20% / 0.14), 0 8px 10px -6px hsl(25 30% 20% / 0.1);
-    --shadow-2xl: 0 25px 50px -12px hsl(25 30% 20% / 0.25);
+    /* Elegant shadows */
+    --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.04);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-sm: 0 2px 4px 0px hsl(0 0% 0% / 0.06), 0 1px 2px -1px hsl(0 0% 0% / 0.04);
+    --shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.08), 0 2px 4px -2px hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 6px 10px -2px hsl(0 0% 0% / 0.1), 0 3px 5px -3px hsl(0 0% 0% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.12), 0 4px 6px -4px hsl(0 0% 0% / 0.08);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.14), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
+    --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.25);
 
     --tracking-normal: 0em;
     --spacing: 0.25rem;
 
-    /* Custom mood colors */
-    --mood-ecstatic: 45 90% 55%;
-    --mood-joyful: 35 80% 55%;
-    --mood-content: 25 60% 55%;
-    --mood-hopeful: 80 50% 50%;
-    --mood-neutral: 35 15% 60%;
-    --mood-thoughtful: 220 40% 55%;
-    --mood-melancholy: 240 30% 50%;
-    --mood-anxious: 280 35% 50%;
-    --mood-distressed: 0 50% 45%;
+    /* Monochrome mood colors */
+    --mood-ecstatic: 0 0% 30%;
+    --mood-joyful: 0 0% 35%;
+    --mood-content: 0 0% 40%;
+    --mood-hopeful: 0 0% 45%;
+    --mood-neutral: 0 0% 50%;
+    --mood-thoughtful: 0 0% 55%;
+    --mood-melancholy: 0 0% 60%;
+    --mood-anxious: 0 0% 65%;
+    --mood-distressed: 0 0% 70%;
   }
 
   .dark {
-    /* Deep warm charcoal */
-    --background: 25 20% 10%;
-    --foreground: 40 25% 92%;
+    /* Pure monochrome dark theme */
+    --background: 0 0% 8%;
+    --foreground: 0 0% 95%;
 
-    /* Warm dark cards */
-    --card: 25 18% 14%;
-    --card-foreground: 40 25% 92%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 25 20% 16%;
-    --popover-foreground: 40 25% 92%;
+    --popover: 0 0% 14%;
+    --popover-foreground: 0 0% 95%;
 
-    /* Warm amber primary */
-    --primary: 30 70% 55%;
-    --primary-foreground: 25 20% 10%;
+    /* Elegant light gray primary */
+    --primary: 0 0% 85%;
+    --primary-foreground: 0 0% 10%;
 
-    /* Muted warm secondary */
-    --secondary: 25 15% 22%;
-    --secondary-foreground: 40 25% 92%;
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 0 0% 90%;
 
-    /* Dark muted tones */
-    --muted: 25 12% 25%;
-    --muted-foreground: 35 15% 60%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 60%;
 
-    /* Subtle accent */
-    --accent: 25 15% 18%;
-    --accent-foreground: 40 25% 85%;
+    --accent: 0 0% 16%;
+    --accent-foreground: 0 0% 85%;
 
-    /* Dark mode destructive */
     --destructive: 0 60% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Dark warm borders */
-    --border: 25 12% 22%;
-    --input: 25 15% 25%;
-    --ring: 30 70% 55%;
+    --border: 0 0% 18%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 85%;
 
-    --sidebar-background: 25 18% 12%;
-    --sidebar-foreground: 40 25% 92%;
-    --sidebar-primary: 30 70% 55%;
-    --sidebar-primary-foreground: 25 20% 10%;
-    --sidebar-accent: 25 15% 20%;
-    --sidebar-accent-foreground: 40 25% 85%;
-    --sidebar-border: 25 12% 22%;
-    --sidebar-ring: 30 70% 55%;
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 0 0% 85%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 16%;
+    --sidebar-accent-foreground: 0 0% 85%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 0 0% 85%;
 
-    /* Dark mode chart colors */
-    --chart-1: 45 65% 55%;
-    --chart-2: 30 55% 50%;
-    --chart-3: 15 50% 50%;
-    --chart-4: 0 45% 50%;
-    --chart-5: 350 40% 45%;
+    /* Monochrome chart colors */
+    --chart-1: 0 0% 70%;
+    --chart-2: 0 0% 60%;
+    --chart-3: 0 0% 50%;
+    --chart-4: 0 0% 40%;
+    --chart-5: 0 0% 30%;
 
-    --sidebar: 25 18% 14%;
+    --sidebar: 0 0% 12%;
 
-    /* Dark shadows */
-    --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.15);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.2);
-    --shadow-sm: 0 2px 4px 0px hsl(0 0% 0% / 0.25), 0 1px 2px -1px hsl(0 0% 0% / 0.15);
-    --shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
-    --shadow-md: 0 6px 10px -2px hsl(0 0% 0% / 0.35), 0 3px 5px -3px hsl(0 0% 0% / 0.25);
-    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.4), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
-    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.45), 0 8px 10px -6px hsl(0 0% 0% / 0.35);
-    --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.6);
+    /* Dark elegant shadows */
+    --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.2);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --shadow-sm: 0 2px 4px 0px hsl(0 0% 0% / 0.3), 0 1px 2px -1px hsl(0 0% 0% / 0.2);
+    --shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.35), 0 2px 4px -2px hsl(0 0% 0% / 0.25);
+    --shadow-md: 0 6px 10px -2px hsl(0 0% 0% / 0.4), 0 3px 5px -3px hsl(0 0% 0% / 0.3);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.45), 0 4px 6px -4px hsl(0 0% 0% / 0.35);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.5), 0 8px 10px -6px hsl(0 0% 0% / 0.4);
+    --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.65);
 
-    /* Dark mood colors */
-    --mood-ecstatic: 45 85% 50%;
-    --mood-joyful: 35 75% 50%;
-    --mood-content: 25 55% 50%;
-    --mood-hopeful: 80 45% 45%;
-    --mood-neutral: 35 12% 55%;
-    --mood-thoughtful: 220 35% 50%;
-    --mood-melancholy: 240 25% 45%;
-    --mood-anxious: 280 30% 45%;
-    --mood-distressed: 0 45% 40%;
+    /* Monochrome dark mood colors */
+    --mood-ecstatic: 0 0% 75%;
+    --mood-joyful: 0 0% 70%;
+    --mood-content: 0 0% 65%;
+    --mood-hopeful: 0 0% 60%;
+    --mood-neutral: 0 0% 55%;
+    --mood-thoughtful: 0 0% 50%;
+    --mood-melancholy: 0 0% 45%;
+    --mood-anxious: 0 0% 40%;
+    --mood-distressed: 0 0% 35%;
   }
 }
 
@@ -180,5 +170,16 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  * {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
 }

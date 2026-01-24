@@ -1,11 +1,16 @@
-import { Book, Moon, Sun, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { Book, Moon, Sun, Wifi, WifiOff, RefreshCw, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import { useSyncStatus } from '@/hooks/use-sync-status';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export function Header() {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { status, isOnline } = useSyncStatus();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
   const toggleTheme = () => {
     if (theme === 'system') {
@@ -15,12 +20,23 @@ export function Header() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Successfully logged out');
+      navigate('/login');
+    } catch (error) {
+      toast.error('Failed to logout');
+      console.error(error);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between">
         <div className="flex items-center gap-2">
           <Book className="h-6 w-6 text-primary" />
-          <h1 className="font-serif text-xl font-semibold text-foreground">
+          <h1 className="text-xl font-semibold text-foreground">
             Diary Vault
           </h1>
         </div>
@@ -52,6 +68,18 @@ export function Header() {
               <Moon className="h-4 w-4" />
             )}
             <span className="sr-only">Toggle theme</span>
+          </Button>
+
+          {/* Logout Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+            className="h-9 w-9"
+            title="Logout"
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="sr-only">Logout</span>
           </Button>
         </div>
       </div>
