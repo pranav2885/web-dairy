@@ -1,0 +1,33 @@
+{
+  "name": "Diary Vault",
+  "short_name": "Diary Vault",
+  "description": "Your private, encrypted digital diary with mood tracking",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f3ee",
+  "theme_color": "#a0634b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "New Entry",
+      "url": "/?action=new",
+      "description": "Create a new diary entry"
+    }
+  ]
+}

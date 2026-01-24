@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,89 +10,166 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Warm cream backgrounds */
+    --background: 40 33% 96%;
+    --foreground: 25 30% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Soft paper-like cards */
+    --card: 45 40% 98%;
+    --card-foreground: 25 30% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 40 35% 95%;
+    --popover-foreground: 25 30% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Muted terracotta primary */
+    --primary: 15 45% 45%;
+    --primary-foreground: 45 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Warm brown secondary */
+    --secondary: 30 25% 88%;
+    --secondary-foreground: 25 30% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Soft muted tones */
+    --muted: 35 20% 90%;
+    --muted-foreground: 25 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Gentle accent */
+    --accent: 35 35% 92%;
+    --accent-foreground: 25 30% 25%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Warm destructive */
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Soft warm borders */
+    --border: 35 20% 85%;
+    --input: 35 25% 88%;
+    --ring: 15 45% 45%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 40 30% 97%;
+    --sidebar-foreground: 25 30% 15%;
+    --sidebar-primary: 15 45% 45%;
+    --sidebar-primary-foreground: 45 40% 98%;
+    --sidebar-accent: 35 35% 92%;
+    --sidebar-accent-foreground: 25 30% 25%;
+    --sidebar-border: 35 20% 85%;
+    --sidebar-ring: 15 45% 45%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Mood chart colors - warm spectrum */
+    --chart-1: 45 70% 60%;
+    --chart-2: 30 60% 55%;
+    --chart-3: 15 50% 50%;
+    --chart-4: 0 45% 55%;
+    --chart-5: 350 40% 50%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar: 40 30% 97%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    --font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    --font-serif: 'Crimson Pro', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+    --font-mono: 'SF Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    /* Soft, cozy shadows */
+    --shadow-2xs: 0 1px 2px 0px hsl(25 30% 20% / 0.03);
+    --shadow-xs: 0 1px 3px 0px hsl(25 30% 20% / 0.04);
+    --shadow-sm: 0 2px 4px 0px hsl(25 30% 20% / 0.06), 0 1px 2px -1px hsl(25 30% 20% / 0.04);
+    --shadow: 0 4px 6px -1px hsl(25 30% 20% / 0.08), 0 2px 4px -2px hsl(25 30% 20% / 0.05);
+    --shadow-md: 0 6px 10px -2px hsl(25 30% 20% / 0.1), 0 3px 5px -3px hsl(25 30% 20% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(25 30% 20% / 0.12), 0 4px 6px -4px hsl(25 30% 20% / 0.08);
+    --shadow-xl: 0 20px 25px -5px hsl(25 30% 20% / 0.14), 0 8px 10px -6px hsl(25 30% 20% / 0.1);
+    --shadow-2xl: 0 25px 50px -12px hsl(25 30% 20% / 0.25);
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --tracking-normal: 0em;
+    --spacing: 0.25rem;
 
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Custom mood colors */
+    --mood-ecstatic: 45 90% 55%;
+    --mood-joyful: 35 80% 55%;
+    --mood-content: 25 60% 55%;
+    --mood-hopeful: 80 50% 50%;
+    --mood-neutral: 35 15% 60%;
+    --mood-thoughtful: 220 40% 55%;
+    --mood-melancholy: 240 30% 50%;
+    --mood-anxious: 280 35% 50%;
+    --mood-distressed: 0 50% 45%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Deep warm charcoal */
+    --background: 25 20% 10%;
+    --foreground: 40 25% 92%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    /* Warm dark cards */
+    --card: 25 18% 14%;
+    --card-foreground: 40 25% 92%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 25 20% 16%;
+    --popover-foreground: 40 25% 92%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Warm amber primary */
+    --primary: 30 70% 55%;
+    --primary-foreground: 25 20% 10%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    /* Muted warm secondary */
+    --secondary: 25 15% 22%;
+    --secondary-foreground: 40 25% 92%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    /* Dark muted tones */
+    --muted: 25 12% 25%;
+    --muted-foreground: 35 15% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Subtle accent */
+    --accent: 25 15% 18%;
+    --accent-foreground: 40 25% 85%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    /* Dark mode destructive */
+    --destructive: 0 60% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Dark warm borders */
+    --border: 25 12% 22%;
+    --input: 25 15% 25%;
+    --ring: 30 70% 55%;
+
+    --sidebar-background: 25 18% 12%;
+    --sidebar-foreground: 40 25% 92%;
+    --sidebar-primary: 30 70% 55%;
+    --sidebar-primary-foreground: 25 20% 10%;
+    --sidebar-accent: 25 15% 20%;
+    --sidebar-accent-foreground: 40 25% 85%;
+    --sidebar-border: 25 12% 22%;
+    --sidebar-ring: 30 70% 55%;
+
+    /* Dark mode chart colors */
+    --chart-1: 45 65% 55%;
+    --chart-2: 30 55% 50%;
+    --chart-3: 15 50% 50%;
+    --chart-4: 0 45% 50%;
+    --chart-5: 350 40% 45%;
+
+    --sidebar: 25 18% 14%;
+
+    /* Dark shadows */
+    --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.15);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.2);
+    --shadow-sm: 0 2px 4px 0px hsl(0 0% 0% / 0.25), 0 1px 2px -1px hsl(0 0% 0% / 0.15);
+    --shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 6px 10px -2px hsl(0 0% 0% / 0.35), 0 3px 5px -3px hsl(0 0% 0% / 0.25);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.4), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.45), 0 8px 10px -6px hsl(0 0% 0% / 0.35);
+    --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.6);
+
+    /* Dark mood colors */
+    --mood-ecstatic: 45 85% 50%;
+    --mood-joyful: 35 75% 50%;
+    --mood-content: 25 55% 50%;
+    --mood-hopeful: 80 45% 45%;
+    --mood-neutral: 35 12% 55%;
+    --mood-thoughtful: 220 35% 50%;
+    --mood-melancholy: 240 25% 45%;
+    --mood-anxious: 280 30% 45%;
+    --mood-distressed: 0 45% 40%;
   }
 }
 
