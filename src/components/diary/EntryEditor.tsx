@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Save, Trash2 } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { ArrowLeft, Save, Trash2, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Palette, FileText } from 'lucide-react';
 import { 
   type DiaryEntry, 
   type MoodMetadata,
@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +27,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface EntryEditorProps {
   entry?: DiaryEntry | null;
@@ -41,7 +43,39 @@ export function EntryEditor({ entry, onSave, onBack }: EntryEditorProps) {
   const [autoMood, setAutoMood] = useState<MoodMetadata | null>(entry?.autoMood || null);
   const [userMood, setUserMood] = useState<MoodMetadata | null>(entry?.userMood || null);
   const [saving, setSaving] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Rich text formatting states
+  const [textColor, setTextColor] = useState('#000000');
+  const [currentFormat, setCurrentFormat] = useState({
+    bold: false,
+    italic: false,
+    underline: false,
+    align: 'left',
+  });
+
+  // Word and character count
+  const { wordCount, charCount } = useMemo(() => {
+    const text = content.trim();
+    const words = text ? text.split(/\s+/).length : 0;
+    const chars = content.length;
+    return { wordCount: words, charCount: chars };
+  }, [content]);
+
+  // Templates
+  const templates = [
+    { name: 'Daily Reflection', content: '📅 Today\'s Date:\n\n🌅 Morning Thoughts:\n\n🎯 Goals for Today:\n\n✨ Highlights:\n\n💭 Reflections:\n\n🌙 Evening Notes:' },
+    { name: 'Gratitude Journal', content: '🙏 Three Things I\'m Grateful For:\n\n1. \n2. \n3. \n\n💖 Why I\'m Grateful:\n\n✨ Positive Moment of the Day:' },
+    { name: 'Dream Journal', content: '🌙 Date:\n\n💭 Dream Description:\n\n😊 Emotions Felt:\n\n🔍 Symbols & Themes:\n\n💡 Interpretation:' },
+    { name: 'Goal Setting', content: '🎯 Goal:\n\n📋 Why This Matters:\n\n📝 Action Steps:\n\n1. \n2. \n3. \n\n⏰ Timeline:\n\n✅ Success Metrics:' },
+  ];
+
+  const applyTemplate = (template: string) => {
+    setContent(template);
+    setShowTemplates(false);
+  };
 
   // Debounced sentiment analysis
   useEffect(() => {
@@ -124,6 +158,44 @@ export function EntryEditor({ entry, onSave, onBack }: EntryEditorProps) {
     }
   };
 
+  // Rich text formatting functions
+  const execCommand = (command: string, value?: string) => {
+    document.execCommand(command, false, value);
+    updateFormatState();
+  };
+
+  const toggleBold = () => execCommand('bold');
+  const toggleItalic = () => execCommand('italic');
+  const toggleUnderline = () => execCommand('underline');
+  const setAlignment = (align: string) => {
+    const command = align === 'left' ? 'justifyLeft' : 
+                   align === 'center' ? 'justifyCenter' : 
+                   align === 'right' ? 'justifyRight' : 'justifyFull';
+    execCommand(command);
+  };
+  const insertUnorderedList = () => execCommand('insertUnorderedList');
+  const insertOrderedList = () => execCommand('insertOrderedList');
+  const changeFontColor = (color: string) => {
+    setTextColor(color);
+    execCommand('foreColor', color);
+  };
+
+  const updateFormatState = () => {
+    setCurrentFormat({
+      bold: document.queryCommandState('bold'),
+      italic: document.queryCommandState('italic'),
+      underline: document.queryCommandState('underline'),
+      align: document.queryCommandState('justifyCenter') ? 'center' :
+             document.queryCommandState('justifyRight') ? 'right' :
+             document.queryCommandState('justifyFull') ? 'justify' : 'left',
+    });
+  };
+
+  const handleContentInput = (e: React.FormEvent<HTMLDivElement>) => {
+    const text = e.currentTarget.innerText;
+    setContent(text);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Editor Header */}
@@ -168,6 +240,202 @@ export function EntryEditor({ entry, onSave, onBack }: EntryEditorProps) {
       {/* Editor Content */}
       <div className="flex-1 container py-6 max-w-3xl">
         <div className="space-y-6">
+          {/* Timestamp */}
+          <div className="text-center text-xs font-semibold text-muted-foreground tracking-wider">
+            {new Date().toLocaleString('en-US', { 
+              month: 'long', 
+              day: 'numeric', 
+              year: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true 
+            }).toUpperCase()}
+          </div>
+
+          {/* Rich Text Toolbar */}
+          <div className="sticky top-14 z-30 bg-background border-y border-border py-2">
+            <div className="flex items-center justify-center gap-1 flex-wrap">
+              {/* Text Style Buttons */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleBold}
+                className={cn(
+                  'h-8 w-8 p-0',
+                  currentFormat.bold && 'bg-accent'
+                )}
+                title="Bold (Ctrl+B)"
+              >
+                <Bold className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleItalic}
+                className={cn(
+                  'h-8 w-8 p-0',
+                  currentFormat.italic && 'bg-accent'
+                )}
+                title="Italic (Ctrl+I)"
+              >
+                <Italic className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleUnderline}
+                className={cn(
+                  'h-8 w-8 p-0',
+                  currentFormat.underline && 'bg-accent'
+                )}
+                title="Underline (Ctrl+U)"
+              >
+                <Underline className="h-4 w-4" />
+              </Button>
+
+              <div className="w-px h-6 bg-border mx-1" />
+
+              {/* Alignment Buttons */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setAlignment('left')}
+                className={cn(
+                  'h-8 w-8 p-0',
+                  currentFormat.align === 'left' && 'bg-accent'
+                )}
+                title="Align Left"
+              >
+                <AlignLeft className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setAlignment('center')}
+                className={cn(
+                  'h-8 w-8 p-0',
+                  currentFormat.align === 'center' && 'bg-accent'
+                )}
+                title="Align Center"
+              >
+                <AlignCenter className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setAlignment('right')}
+                className={cn(
+                  'h-8 w-8 p-0',
+                  currentFormat.align === 'right' && 'bg-accent'
+                )}
+                title="Align Right"
+              >
+                <AlignRight className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setAlignment('justify')}
+                className={cn(
+                  'h-8 w-8 p-0',
+                  currentFormat.align === 'justify' && 'bg-accent'
+                )}
+                title="Justify"
+              >
+                <AlignJustify className="h-4 w-4" />
+              </Button>
+
+              <div className="w-px h-6 bg-border mx-1" />
+
+              {/* List Buttons */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={insertUnorderedList}
+                className="h-8 w-8 p-0"
+                title="Bullet List"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={insertOrderedList}
+                className="h-8 w-8 p-0"
+                title="Numbered List"
+              >
+                <ListOrdered className="h-4 w-4" />
+              </Button>
+
+              <div className="w-px h-6 bg-border mx-1" />
+
+              {/* Color Picker */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    title="Text Color"
+                  >
+                    <Palette className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-3">
+                  <div className="grid grid-cols-8 gap-2">
+                    {['#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFFFFF',
+                      '#808080', '#800000', '#008000', '#000080', '#808000', '#800080', '#008080', '#C0C0C0'].map(color => (
+                      <button
+                        key={color}
+                        onClick={() => changeFontColor(color)}
+                        className="w-6 h-6 rounded border-2 border-border hover:scale-110 transition-transform"
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              <div className="w-px h-6 bg-border mx-1" />
+
+              {/* Templates */}
+              <Popover open={showTemplates} onOpenChange={setShowTemplates}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-3 gap-1.5"
+                    title="Choose Template"
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span className="text-xs">Template</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-2">
+                  <div className="space-y-1">
+                    {templates.map((template) => (
+                      <Button
+                        key={template.name}
+                        variant="ghost"
+                        className="w-full justify-start text-left h-auto py-2"
+                        onClick={() => applyTemplate(template.content)}
+                      >
+                        {template.name}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
           {/* Title */}
           <div className="space-y-2">
             <Input
@@ -178,14 +446,31 @@ export function EntryEditor({ entry, onSave, onBack }: EntryEditorProps) {
             />
           </div>
 
-          {/* Content */}
+          {/* Rich Text Content */}
           <div className="space-y-2">
-            <Textarea
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              placeholder="What's on your mind today?"
-              className="min-h-[300px] resize-none border-0 px-0 focus-visible:ring-0 bg-transparent text-base leading-relaxed"
+            <div
+              ref={contentRef}
+              contentEditable
+              onInput={handleContentInput}
+              onMouseUp={updateFormatState}
+              onKeyUp={updateFormatState}
+              className="min-h-[300px] border-0 px-0 focus:outline-none bg-transparent text-base leading-relaxed"
+              style={{ whiteSpace: 'pre-wrap' }}
+              suppressContentEditableWarning
+              dangerouslySetInnerHTML={{ __html: content }}
             />
+            {!content && (
+              <div className="absolute pointer-events-none text-muted-foreground mt-[-300px]">
+                Start writing or choose a Template
+              </div>
+            )}
+          </div>
+
+          {/* Word and Character Count */}
+          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground border-t border-border pt-4">
+            <span>Words {wordCount}</span>
+            <span>•</span>
+            <span>Characters {charCount}</span>
           </div>
 
           {/* Tags */}

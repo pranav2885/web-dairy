@@ -1,10 +1,11 @@
-import { Book, Moon, Sun, Wifi, WifiOff, RefreshCw, LogOut } from 'lucide-react';
+import { Moon, Sun, Wifi, WifiOff, RefreshCw, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/hooks/use-theme';
 import { useSyncStatus } from '@/hooks/use-sync-status';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { SoulLogLogo } from '@/components/SoulLogLogo';
 
 export function Header() {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -35,9 +36,9 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Book className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-semibold text-foreground">
-            Diary Vault
+          <SoulLogLogo className="text-foreground" size={36} />
+          <h1 className="text-xl font-semibold tracking-wide bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent">
+            SoulLog
           </h1>
         </div>
 
@@ -56,7 +57,7 @@ export function Header() {
           </div>
 
           {/* Theme Toggle */}
-          <Button
+          {/* <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
@@ -68,19 +69,21 @@ export function Header() {
               <Moon className="h-4 w-4" />
             )}
             <span className="sr-only">Toggle theme</span>
-          </Button>
+          </Button> */}
 
           {/* Logout Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleLogout}
-            className="h-9 w-9"
-            title="Logout"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="sr-only">Logout</span>
-          </Button>
+          <div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="h-9 w-9"
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="sr-only">Logout</span>
+            </Button>
+          </div>
         </div>
       </div>
     </header>

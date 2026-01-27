@@ -20,8 +20,8 @@ export function EntryCard({ entry, onClick, className }: EntryCardProps) {
   return (
     <Card 
       className={cn(
-        'cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5',
-        'bg-card border-border',
+        'cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1',
+        'bg-card border-border hover:border-primary/50',
         className
       )}
       onClick={onClick}
@@ -47,7 +47,7 @@ export function EntryCard({ entry, onClick, className }: EntryCardProps) {
         </p>
         {entry.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
-            {entry.tags.slice(0, 3).map(tag => (
+            {entry.tags.slice(0, 3).map((tag) => (
               <Badge key={tag} variant="secondary" className="text-xs">
                 {tag}
               </Badge>
