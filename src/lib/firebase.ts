@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
@@ -21,8 +21,19 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase Auth
 export const auth = getAuth(app);
 
+// Set auth persistence to LOCAL (persists even when browser is closed)
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+  console.error('Failed to set auth persistence:', error);
+});
+
 // Initialize Google Auth Provider
 export const googleProvider = new GoogleAuthProvider();
+// Force account selection and add popup parameters
+googleProvider.setCustomParameters({
+  prompt: 'select_account',
+  // This helps with CORS issues in production
+  display: 'popup'
+});
 
 // Initialize Firestore
 export const firestore = getFirestore(app);

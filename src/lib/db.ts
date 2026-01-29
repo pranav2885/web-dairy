@@ -121,17 +121,23 @@ async function syncEntryToFirestore(entry: DiaryEntry): Promise<void> {
     const entryRef = doc(firestore, `users/${user.uid}/entries`, entry.id);
     
     // Convert ArrayBuffer and Uint8Array to base64 for Firestore storage
-    const { plaintextTitle, plaintextContent, ...entryWithoutPlaintext } = entry;
-    
     const firestoreEntry = {
-      ...entryWithoutPlaintext,
+      id: entry.id,
       encryptedContent: entry.encryptedContent ? arrayBufferToBase64(entry.encryptedContent) : null,
       encryptedTitle: entry.encryptedTitle ? arrayBufferToBase64(entry.encryptedTitle) : null,
       contentIv: entry.contentIv ? uint8ArrayToBase64(entry.contentIv) : null,
       titleIv: entry.titleIv ? uint8ArrayToBase64(entry.titleIv) : null,
+      tags: entry.tags,
+      autoMood: entry.autoMood,
+      userMood: entry.userMood,
+      version: entry.version,
+      syncStatus: entry.syncStatus,
+      deviceId: entry.deviceId,
       createdAt: Timestamp.fromMillis(entry.createdAt),
       updatedAt: Timestamp.fromMillis(entry.updatedAt),
-      // Plaintext fields are excluded for security
+      // Include plaintext fields for now (until encryption is fully implemented)
+      plaintextTitle: entry.plaintextTitle || '',
+      plaintextContent: entry.plaintextContent || '',
     };
 
     await setDoc(entryRef, firestoreEntry);
@@ -168,63 +174,89 @@ export async function syncEntriesFromFirestore(): Promise<void> {
   }
 
   try {
-    console.log('Syncing entries from Firestore...');
+    console.log('[Sync] Starting sync from Firestore for user:', user.uid);
     const entriesRef = collection(firestore, `users/${user.uid}/entries`);
     const snapshot = await getDocs(entriesRef);
+    
+    console.log(`[Sync] Fetched ${snapshot.size} entries from Firestore`);
     
     const firestoreEntries: DiaryEntry[] = [];
     
     snapshot.forEach((doc) => {
-      const data = doc.data();
-      
-      // Convert base64 back to ArrayBuffer and Uint8Array
-      const entry: DiaryEntry = {
-        id: doc.id,
-        encryptedContent: data.encryptedContent ? base64ToArrayBuffer(data.encryptedContent) : null,
-        encryptedTitle: data.encryptedTitle ? base64ToArrayBuffer(data.encryptedTitle) : null,
-        contentIv: data.contentIv ? base64ToUint8Array(data.contentIv) : null,
-        titleIv: data.titleIv ? base64ToUint8Array(data.titleIv) : null,
-        tags: data.tags || [],
-        autoMood: data.autoMood || null,
-        userMood: data.userMood || null,
-        createdAt: data.createdAt?.toMillis() || Date.now(),
-        updatedAt: data.updatedAt?.toMillis() || Date.now(),
-        version: data.version || 1,
-        syncStatus: 'synced',
-        deviceId: data.deviceId || getOrCreateDeviceId(),
-        plaintextTitle: data.plaintextTitle,
-        plaintextContent: data.plaintextContent,
-      };
-      
-      firestoreEntries.push(entry);
+      try {
+        const data = doc.data();
+        
+        // Convert base64 back to ArrayBuffer and Uint8Array
+        const entry: DiaryEntry = {
+          id: doc.id,
+          encryptedContent: data.encryptedContent ? base64ToArrayBuffer(data.encryptedContent) : null,
+          encryptedTitle: data.encryptedTitle ? base64ToArrayBuffer(data.encryptedTitle) : null,
+          contentIv: data.contentIv ? base64ToUint8Array(data.contentIv) : null,
+          titleIv: data.titleIv ? base64ToUint8Array(data.titleIv) : null,
+          tags: data.tags || [],
+          autoMood: data.autoMood || null,
+          userMood: data.userMood || null,
+          createdAt: data.createdAt?.toMillis() || Date.now(),
+          updatedAt: data.updatedAt?.toMillis() || Date.now(),
+          version: data.version || 1,
+          syncStatus: 'synced',
+          deviceId: data.deviceId || getOrCreateDeviceId(),
+          plaintextTitle: data.plaintextTitle,
+          plaintextContent: data.plaintextContent,
+        };
+        
+        firestoreEntries.push(entry);
+      } catch (entryError) {
+        console.error('[Sync] Failed to process entry:', doc.id, entryError);
+      }
     });
     
+    console.log(`[Sync] Processing ${firestoreEntries.length} valid entries`);
+    
     // Merge with local entries (conflict resolution)
+    let added = 0, updated = 0, conflicts = 0, skipped = 0;
+    
     for (const firestoreEntry of firestoreEntries) {
-      const localEntry = await db.entries.get(firestoreEntry.id);
-      
-      if (!localEntry) {
-        // New entry from Firestore, add it
-        await db.entries.add(firestoreEntry);
-        console.log('Added entry from Firestore:', firestoreEntry.id);
-      } else if (localEntry.syncStatus === 'pending') {
-        // Local has changes, check which is newer
-        if (firestoreEntry.updatedAt > localEntry.updatedAt) {
-          // Remote is newer, but we have pending changes - create conflict
-          await addConflict(firestoreEntry.id, localEntry, firestoreEntry);
-          console.log('Conflict detected for entry:', firestoreEntry.id);
+      try {
+        const localEntry = await db.entries.get(firestoreEntry.id);
+        
+        if (!localEntry) {
+          // New entry from Firestore, add it
+          await db.entries.add(firestoreEntry);
+          added++;
+          console.log('[Sync] Added entry from Firestore:', firestoreEntry.id);
+        } else if (localEntry.syncStatus === 'pending') {
+          // Local has changes, check which is newer
+          if (firestoreEntry.updatedAt > localEntry.updatedAt) {
+            // Remote is newer, but we have pending changes - create conflict
+            await addConflict(firestoreEntry.id, localEntry, firestoreEntry);
+            conflicts++;
+            console.log('[Sync] Conflict detected for entry:', firestoreEntry.id);
+          } else {
+            skipped++;
+          }
+          // Keep local pending changes
+        } else if (firestoreEntry.version > localEntry.version || firestoreEntry.updatedAt > localEntry.updatedAt) {
+          // Remote is newer and no local changes, update
+          await db.entries.put(firestoreEntry);
+          updated++;
+          console.log('[Sync] Updated entry from Firestore:', firestoreEntry.id);
+        } else {
+          skipped++;
         }
-        // Keep local pending changes
-      } else if (firestoreEntry.version > localEntry.version || firestoreEntry.updatedAt > localEntry.updatedAt) {
-        // Remote is newer and no local changes, update
-        await db.entries.put(firestoreEntry);
-        console.log('Updated entry from Firestore:', firestoreEntry.id);
+      } catch (entryError) {
+        console.error('[Sync] Failed to merge entry:', firestoreEntry.id, entryError);
       }
     }
     
-    console.log(`Synced ${firestoreEntries.length} entries from Firestore`);
+    console.log(`[Sync] Completed: ${added} added, ${updated} updated, ${conflicts} conflicts, ${skipped} skipped`);
   } catch (error) {
-    console.error('Failed to sync entries from Firestore:', error);
+    console.error('[Sync] Failed to sync entries from Firestore:', error);
+    // Log more details about the error
+    if (error instanceof Error) {
+      console.error('[Sync] Error message:', error.message);
+      console.error('[Sync] Error stack:', error.stack);
+    }
     throw error;
   }
 }

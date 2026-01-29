@@ -61,22 +61,50 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
+    let isMounted = true;
+    
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!isMounted) return;
+      
+      console.log('[Auth] Auth state changed, user:', user?.uid || 'none');
       setCurrentUser(user);
       
       // Sync entries from Firestore when user logs in
       if (user) {
-        try {
-          await syncEntriesFromFirestore();
-        } catch (error) {
-          console.error('Failed to sync entries on auth change:', error);
-        }
+        // Add a small delay to ensure Firebase is fully initialized
+        setTimeout(async () => {
+          if (!isMounted) return;
+          
+          try {
+            console.log('[Auth] Initiating sync for user:', user.uid);
+            await syncEntriesFromFirestore();
+            console.log('[Auth] Sync completed successfully');
+          } catch (error) {
+            console.error('[Auth] Failed to sync entries on auth change:', error);
+            
+            // Retry once after a delay
+            setTimeout(async () => {
+              if (!isMounted) return;
+              
+              try {
+                console.log('[Auth] Retrying sync...');
+                await syncEntriesFromFirestore();
+                console.log('[Auth] Retry sync completed successfully');
+              } catch (retryError) {
+                console.error('[Auth] Retry sync failed:', retryError);
+              }
+            }, 2000);
+          }
+        }, 500);
       }
       
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, []);
 
   const value: AuthContextType = {
