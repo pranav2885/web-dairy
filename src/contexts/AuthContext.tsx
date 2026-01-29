@@ -10,6 +10,7 @@ import {
   sendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
+import { syncEntriesFromFirestore } from '@/lib/db';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -60,8 +61,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      
+      // Sync entries from Firestore when user logs in
+      if (user) {
+        try {
+          await syncEntriesFromFirestore();
+        } catch (error) {
+          console.error('Failed to sync entries on auth change:', error);
+        }
+      }
+      
       setLoading(false);
     });
 

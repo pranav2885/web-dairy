@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, startOfYear, startOfWeek, endOfWeek, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, addYears, subYears } from 'date-fns';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getAllEntries, type DiaryEntry } from '@/lib/db';
+import { getAllEntries, syncEntriesFromFirestore, type DiaryEntry } from '@/lib/db';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -30,6 +30,15 @@ export function CalendarView({ onDateSelect, onNewEntry, onViewEntry, selectedDa
 
   const loadEntries = async () => {
     try {
+      // First, sync from Firestore to get latest data
+      try {
+        await syncEntriesFromFirestore();
+      } catch (syncError) {
+        console.error('Failed to sync from Firestore:', syncError);
+        // Continue loading local entries even if sync fails
+      }
+      
+      // Then load all entries from local database
       const allEntries = await getAllEntries();
       setEntries(allEntries);
     } catch (error) {
