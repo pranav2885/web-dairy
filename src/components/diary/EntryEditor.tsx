@@ -31,11 +31,12 @@ import { cn } from '@/lib/utils';
 
 interface EntryEditorProps {
   entry?: DiaryEntry | null;
+  selectedDate?: Date | null;
   onSave: () => void;
   onBack: () => void;
 }
 
-export function EntryEditor({ entry, onSave, onBack }: EntryEditorProps) {
+export function EntryEditor({ entry, selectedDate, onSave, onBack }: EntryEditorProps) {
   const [title, setTitle] = useState(entry?.plaintextTitle || '');
   const [content, setContent] = useState(entry?.plaintextContent || '');
   const [tags, setTags] = useState<string[]>(entry?.tags || []);
@@ -74,6 +75,9 @@ export function EntryEditor({ entry, onSave, onBack }: EntryEditorProps) {
 
   const applyTemplate = (template: string) => {
     setContent(template);
+    if (contentRef.current) {
+      contentRef.current.innerText = template;
+    }
     setShowTemplates(false);
   };
 
@@ -101,7 +105,7 @@ export function EntryEditor({ entry, onSave, onBack }: EntryEditorProps) {
           userMood,
         });
       } else {
-        await createEntry(title, content, tags, autoMood, userMood);
+        await createEntry(title, content, tags, autoMood, userMood, selectedDate);
       }
       toast({
         title: 'Saved',
@@ -191,10 +195,19 @@ export function EntryEditor({ entry, onSave, onBack }: EntryEditorProps) {
     });
   };
 
-  const handleContentInput = (e: React.FormEvent<HTMLDivElement>) => {
-    const text = e.currentTarget.innerText;
-    setContent(text);
-  };
+  const handleContentInput = useCallback(() => {
+    if (contentRef.current) {
+      const text = contentRef.current.innerText;
+      setContent(text);
+    }
+  }, []);
+
+  // Initialize content when entry changes
+  useEffect(() => {
+    if (contentRef.current && entry?.plaintextContent) {
+      contentRef.current.innerText = entry.plaintextContent;
+    }
+  }, [entry?.id]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -447,7 +460,7 @@ export function EntryEditor({ entry, onSave, onBack }: EntryEditorProps) {
           </div>
 
           {/* Rich Text Content */}
-          <div className="space-y-2">
+          <div className="space-y-2 relative">
             <div
               ref={contentRef}
               contentEditable
@@ -457,10 +470,9 @@ export function EntryEditor({ entry, onSave, onBack }: EntryEditorProps) {
               className="min-h-[300px] border-0 px-0 focus:outline-none bg-transparent text-base leading-relaxed"
               style={{ whiteSpace: 'pre-wrap' }}
               suppressContentEditableWarning
-              dangerouslySetInnerHTML={{ __html: content }}
             />
             {!content && (
-              <div className="absolute pointer-events-none text-muted-foreground mt-[-300px]">
+              <div className="absolute top-0 left-0 pointer-events-none text-muted-foreground">
                 Start writing or choose a Template
               </div>
             )}

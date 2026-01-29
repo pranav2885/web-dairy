@@ -1,5 +1,17 @@
 import Dexie, { type Table } from 'dexie';
 import { v4 as uuidv4 } from 'uuid';
+import { firestore, auth } from './firebase';
+import { 
+  collection, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  getDocs, 
+  deleteDoc, 
+  query, 
+  where,
+  Timestamp 
+} from 'firebase/firestore';
 
 // Mood metadata types
 export interface MoodMetadata {
@@ -97,6 +109,88 @@ class DiaryVaultDB extends Dexie {
 // Database instance
 export const db = new DiaryVaultDB();
 
+// Firestore sync helpers
+async function syncEntryToFirestore(entry: DiaryEntry): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) {
+    console.warn('No authenticated user, skipping Firestore sync');
+    return;
+  }
+
+  try {
+    const entryRef = doc(firestore, `users/${user.uid}/entries`, entry.id);
+    
+    // Convert ArrayBuffer and Uint8Array to base64 for Firestore storage
+    const { plaintextTitle, plaintextContent, ...entryWithoutPlaintext } = entry;
+    
+    const firestoreEntry = {
+      ...entryWithoutPlaintext,
+      encryptedContent: entry.encryptedContent ? arrayBufferToBase64(entry.encryptedContent) : null,
+      encryptedTitle: entry.encryptedTitle ? arrayBufferToBase64(entry.encryptedTitle) : null,
+      contentIv: entry.contentIv ? uint8ArrayToBase64(entry.contentIv) : null,
+      titleIv: entry.titleIv ? uint8ArrayToBase64(entry.titleIv) : null,
+      createdAt: Timestamp.fromMillis(entry.createdAt),
+      updatedAt: Timestamp.fromMillis(entry.updatedAt),
+      // Plaintext fields are excluded for security
+    };
+
+    await setDoc(entryRef, firestoreEntry);
+    console.log('Entry synced to Firestore:', entry.id);
+  } catch (error) {
+    console.error('Failed to sync entry to Firestore:', error);
+    throw error;
+  }
+}
+
+async function deleteEntryFromFirestore(entryId: string): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) {
+    console.warn('No authenticated user, skipping Firestore delete');
+    return;
+  }
+
+  try {
+    const entryRef = doc(firestore, `users/${user.uid}/entries`, entryId);
+    await deleteDoc(entryRef);
+    console.log('Entry deleted from Firestore:', entryId);
+  } catch (error) {
+    console.error('Failed to delete entry from Firestore:', error);
+    throw error;
+  }
+}
+
+// Helper functions to convert between ArrayBuffer/Uint8Array and base64
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  return uint8ArrayToBase64(bytes);
+}
+
+function uint8ArrayToBase64(array: Uint8Array): string {
+  let binary = '';
+  for (let i = 0; i < array.length; i++) {
+    binary += String.fromCharCode(array[i]);
+  }
+  return btoa(binary);
+}
+
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+function base64ToUint8Array(base64: string): Uint8Array {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
 // Helper to generate device ID
 export function getOrCreateDeviceId(): string {
   const stored = localStorage.getItem('diary-vault-device-id');
@@ -113,10 +207,11 @@ export async function createEntry(
   plaintextContent: string,
   tags: string[] = [],
   autoMood: MoodMetadata | null = null,
-  userMood: MoodMetadata | null = null
+  userMood: MoodMetadata | null = null,
+  selectedDate?: Date | null
 ): Promise<string> {
   const id = uuidv4();
-  const now = Date.now();
+  const now = selectedDate ? selectedDate.getTime() : Date.now();
   const deviceId = getOrCreateDeviceId();
 
   const entry: DiaryEntry = {
@@ -142,6 +237,15 @@ export async function createEntry(
   // Update search index
   await updateSearchIndex(id, plaintextTitle, plaintextContent);
 
+  // Sync to Firestore
+  try {
+    await syncEntryToFirestore(entry);
+    await db.entries.update(id, { syncStatus: 'synced' });
+  } catch (error) {
+    console.error('Failed to sync new entry to Firestore:', error);
+    // Entry stays as 'pending' for later sync
+  }
+
   return id;
 }
 
@@ -152,12 +256,14 @@ export async function updateEntry(
   const entry = await db.entries.get(id);
   if (!entry) throw new Error('Entry not found');
 
-  await db.entries.update(id, {
+  const updatedEntry = {
     ...updates,
     updatedAt: Date.now(),
     version: entry.version + 1,
-    syncStatus: 'pending',
-  });
+    syncStatus: 'pending' as SyncStatus,
+  };
+
+  await db.entries.update(id, updatedEntry);
 
   // Update search index if content changed
   if (updates.plaintextTitle !== undefined || updates.plaintextContent !== undefined) {
@@ -165,11 +271,31 @@ export async function updateEntry(
     const newContent = updates.plaintextContent ?? entry.plaintextContent ?? '';
     await updateSearchIndex(id, newTitle, newContent);
   }
+
+  // Sync to Firestore
+  try {
+    const fullEntry = await db.entries.get(id);
+    if (fullEntry) {
+      await syncEntryToFirestore(fullEntry);
+      await db.entries.update(id, { syncStatus: 'synced' });
+    }
+  } catch (error) {
+    console.error('Failed to sync updated entry to Firestore:', error);
+    // Entry stays as 'pending' for later sync
+  }
 }
 
 export async function deleteEntry(id: string): Promise<void> {
   await db.entries.delete(id);
   await db.searchIndex.delete(id);
+  
+  // Delete from Firestore
+  try {
+    await deleteEntryFromFirestore(id);
+  } catch (error) {
+    console.error('Failed to delete entry from Firestore:', error);
+    // Continue even if Firestore delete fails
+  }
 }
 
 export async function getEntry(id: string): Promise<DiaryEntry | undefined> {

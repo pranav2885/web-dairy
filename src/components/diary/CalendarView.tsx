@@ -13,10 +13,11 @@ type ViewMode = 'day' | 'week' | 'month' | 'year';
 interface CalendarViewProps {
   onDateSelect: (date: Date) => void;
   onNewEntry: () => void;
+  onViewEntry: (entry: DiaryEntry) => void;
   selectedDate: Date | null;
 }
 
-export function CalendarView({ onDateSelect, onNewEntry, selectedDate }: CalendarViewProps) {
+export function CalendarView({ onDateSelect, onNewEntry, onViewEntry, selectedDate }: CalendarViewProps) {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('year');
@@ -115,7 +116,7 @@ export function CalendarView({ onDateSelect, onNewEntry, selectedDate }: Calenda
     });
   }, [currentYear]);
 
-  const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const weekDays = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa'];
 
   // Navigation functions
   const navigatePrevious = () => {
@@ -195,7 +196,7 @@ export function CalendarView({ onDateSelect, onNewEntry, selectedDate }: Calenda
                 <div
                   key={entry.id}
                   className="p-4 rounded-lg border border-foreground/10 hover:border-foreground/20 transition-colors cursor-pointer"
-                  onClick={() => onDateSelect(currentDate)}
+                  onClick={() => onViewEntry(entry)}
                 >
                   <p className="text-base font-medium">
                     {entry.plaintextTitle || 'Untitled Entry'}
@@ -565,6 +566,7 @@ export function CalendarView({ onDateSelect, onNewEntry, selectedDate }: Calenda
                     <div
                       key={entry.id}
                       className="p-4 rounded-lg border border-foreground/10 hover:border-foreground/20 transition-colors cursor-pointer"
+                      onClick={() => onViewEntry(entry)}
                     >
                       <p className="text-base font-medium">
                         {entry.plaintextTitle || 'Untitled Entry'}

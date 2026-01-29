@@ -1,8 +1,10 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getAnalytics } from 'firebase/analytics';
 
-// Firebase configuration
-// Replace these with your actual Firebase config values
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDQa2-CWAnVbUieKNTTj5Rajbaia0VxVbE",
   authDomain: "web-dairy.firebaseapp.com",
@@ -21,5 +23,11 @@ export const auth = getAuth(app);
 
 // Initialize Google Auth Provider
 export const googleProvider = new GoogleAuthProvider();
+
+// Initialize Firestore
+export const firestore = getFirestore(app);
+
+// Initialize Analytics (only in browser environment)
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
 export default app;

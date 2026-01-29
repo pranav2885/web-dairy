@@ -81,6 +81,49 @@ Your app should now be running with Firebase authentication!
 ✅ Beautiful UI with tabs for Sign In/Sign Up
 ✅ Error handling and toast notifications
 
+## Step 8: Enable Firestore Database
+
+**IMPORTANT:** Your diary entries will NOT be saved to the cloud until you enable Firestore!
+
+1. In your Firebase Console, click on **"Firestore Database"** in the left sidebar
+2. Click **"Create database"**
+3. Choose a starting mode:
+   - **Production mode** (recommended): Start with security rules
+   - **Test mode**: Open access (NOT recommended for production)
+4. Select a Firestore location (choose the one closest to your users)
+5. Click **"Enable"**
+
+### Configure Firestore Security Rules
+
+After creating your database, set up security rules to protect your data:
+
+1. Go to **Firestore Database > Rules** tab
+2. Replace the default rules with the following:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can only read/write their own diary entries
+    match /users/{userId}/entries/{entryId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Users can only read/write their own user data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+3. Click **"Publish"** to save the rules
+
+These rules ensure that:
+- Users must be authenticated to access data
+- Users can only access their own diary entries
+- No one can read or modify another user's entries
+
 ## Troubleshooting
 
 ### "Firebase: Error (auth/popup-blocked)"

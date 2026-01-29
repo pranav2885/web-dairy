@@ -4,6 +4,7 @@ import { Settings } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { CalendarView } from '@/components/diary/CalendarView';
 import { EntryEditor } from '@/components/diary/EntryEditor';
+import { EntryViewDialog } from '@/components/diary/EntryViewDialog';
 import { CursorSettings } from '@/components/CursorSettings';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -28,6 +29,8 @@ const Index = ({ cursorConfig, onCursorConfigChange }: IndexProps) => {
   const [view, setView] = useState<View>('calendar');
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleDateSelect = useCallback((date: Date) => {
     setSelectedDate(date);
@@ -38,20 +41,38 @@ const Index = ({ cursorConfig, onCursorConfigChange }: IndexProps) => {
     setView('editor');
   }, []);
 
+  const handleViewEntry = useCallback((entry: DiaryEntry) => {
+    setSelectedEntry(entry);
+    setViewDialogOpen(true);
+  }, []);
+
+  const handleEditEntry = useCallback((entry: DiaryEntry) => {
+    setSelectedEntry(entry);
+    setViewDialogOpen(false);
+    setView('editor');
+  }, []);
+
   const handleBack = useCallback(() => {
     setSelectedEntry(null);
     setView('calendar');
+    setRefreshKey(prev => prev + 1);
   }, []);
 
   const handleSave = useCallback(() => {
     setSelectedEntry(null);
     setView('calendar');
+    setRefreshKey(prev => prev + 1);
+  }, []);
+
+  const handleDeleted = useCallback(() => {
+    setRefreshKey(prev => prev + 1);
   }, []);
 
   if (view === 'editor') {
     return (
       <EntryEditor
         entry={selectedEntry}
+        selectedDate={selectedDate}
         onSave={handleSave}
         onBack={handleBack}
       />
@@ -81,16 +102,14 @@ const Index = ({ cursorConfig, onCursorConfigChange }: IndexProps) => {
           </p>
           
           {/* Cursor Settings Button */}
-          <div 
-            className="absolute top-0 right-0"
-            initial={{ opacity: 0, rotate: -180 }}
-            animate={{ opacity: 1, rotate: 0 }}
-            transition={{ type: "spring", stiffness: 100, delay: 0.3 }}
-            whileHover={{ rotate: 90, scale: 1.1 }}
-          >
+          <div className="absolute top-0 right-0">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-full">
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="rounded-full transition-transform hover:rotate-90 hover:scale-110"
+                >
                   <Settings className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -120,11 +139,22 @@ const Index = ({ cursorConfig, onCursorConfigChange }: IndexProps) => {
           </div>
         </div>
         <CalendarView 
+          key={refreshKey}
           onDateSelect={handleDateSelect}
           onNewEntry={handleNewEntry}
+          onViewEntry={handleViewEntry}
           selectedDate={selectedDate}
         />
       </main>
+
+      {/* Entry View Dialog */}
+      <EntryViewDialog
+        entry={selectedEntry}
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        onEdit={handleEditEntry}
+        onDeleted={handleDeleted}
+      />
     </div>
   );
 };
