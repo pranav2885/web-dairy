@@ -159,6 +159,76 @@ async function deleteEntryFromFirestore(entryId: string): Promise<void> {
   }
 }
 
+// Sync entries FROM Firestore to local IndexedDB
+export async function syncEntriesFromFirestore(): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) {
+    console.warn('No authenticated user, skipping Firestore sync');
+    return;
+  }
+
+  try {
+    console.log('Syncing entries from Firestore...');
+    const entriesRef = collection(firestore, `users/${user.uid}/entries`);
+    const snapshot = await getDocs(entriesRef);
+    
+    const firestoreEntries: DiaryEntry[] = [];
+    
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      
+      // Convert base64 back to ArrayBuffer and Uint8Array
+      const entry: DiaryEntry = {
+        id: doc.id,
+        encryptedContent: data.encryptedContent ? base64ToArrayBuffer(data.encryptedContent) : null,
+        encryptedTitle: data.encryptedTitle ? base64ToArrayBuffer(data.encryptedTitle) : null,
+        contentIv: data.contentIv ? base64ToUint8Array(data.contentIv) : null,
+        titleIv: data.titleIv ? base64ToUint8Array(data.titleIv) : null,
+        tags: data.tags || [],
+        autoMood: data.autoMood || null,
+        userMood: data.userMood || null,
+        createdAt: data.createdAt?.toMillis() || Date.now(),
+        updatedAt: data.updatedAt?.toMillis() || Date.now(),
+        version: data.version || 1,
+        syncStatus: 'synced',
+        deviceId: data.deviceId || getOrCreateDeviceId(),
+        plaintextTitle: data.plaintextTitle,
+        plaintextContent: data.plaintextContent,
+      };
+      
+      firestoreEntries.push(entry);
+    });
+    
+    // Merge with local entries (conflict resolution)
+    for (const firestoreEntry of firestoreEntries) {
+      const localEntry = await db.entries.get(firestoreEntry.id);
+      
+      if (!localEntry) {
+        // New entry from Firestore, add it
+        await db.entries.add(firestoreEntry);
+        console.log('Added entry from Firestore:', firestoreEntry.id);
+      } else if (localEntry.syncStatus === 'pending') {
+        // Local has changes, check which is newer
+        if (firestoreEntry.updatedAt > localEntry.updatedAt) {
+          // Remote is newer, but we have pending changes - create conflict
+          await addConflict(firestoreEntry.id, localEntry, firestoreEntry);
+          console.log('Conflict detected for entry:', firestoreEntry.id);
+        }
+        // Keep local pending changes
+      } else if (firestoreEntry.version > localEntry.version || firestoreEntry.updatedAt > localEntry.updatedAt) {
+        // Remote is newer and no local changes, update
+        await db.entries.put(firestoreEntry);
+        console.log('Updated entry from Firestore:', firestoreEntry.id);
+      }
+    }
+    
+    console.log(`Synced ${firestoreEntries.length} entries from Firestore`);
+  } catch (error) {
+    console.error('Failed to sync entries from Firestore:', error);
+    throw error;
+  }
+}
+
 // Helper functions to convert between ArrayBuffer/Uint8Array and base64
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
